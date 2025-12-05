@@ -18,7 +18,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: var(--background);
     color: var(--text-primary);
     line-height: 1.6;
@@ -338,6 +338,7 @@ header {
     border: 1px solid var(--border-color);
     border-radius: 20px;
     cursor: pointer;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 0.95rem;
     color: var(--text-primary);
     transition: all 0.2s ease;

@@ -1,6 +1,18 @@
 const { GoogleGenAI } = require('@google/genai');
 const config = require('./config');
 const path = require('path');
+const fs = require('fs');
+
+// Charger le pre-prompt depuis prompt.md
+const PROMPT_FILE = path.join(__dirname, '..', 'prompt.md');
+let systemPrompt = '';
+
+try {
+  systemPrompt = fs.readFileSync(PROMPT_FILE, 'utf8');
+  console.log('Pre-prompt chargé depuis prompt.md');
+} catch (error) {
+  console.warn('Fichier prompt.md non trouvé, utilisation sans pre-prompt');
+}
 
 // Initialiser le client Gemini
 const ai = new GoogleGenAI({
@@ -91,11 +103,16 @@ async function queryDocuments(question) {
     throw new Error('File Search Store non initialisé. Appelez initializeStore() d\'abord.');
   }
 
+  // Combiner le pre-prompt avec la question de l'utilisateur
+  const fullPrompt = systemPrompt
+    ? `${systemPrompt}\n${question}`
+    : question;
+
   console.log(`Question: ${question}`);
 
   const response = await ai.models.generateContent({
     model: config.gemini.model,
-    contents: question,
+    contents: fullPrompt,
     config: {
       tools: [{
         fileSearch: {
