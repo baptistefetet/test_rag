@@ -263,9 +263,9 @@ async function queryDocuments() {
         const result = await response.json();
 
         if (result.success) {
-            answerArea.textContent = result.answer;
+            answerArea.innerHTML = marked.parse(result.answer);
         } else {
-            answerArea.innerHTML = `<strong style="color: var(--error-color);">Erreur:</strong> ${result.error}`;
+            answerArea.innerHTML = '<strong style="color: var(--error-color);">Une erreur est survenue lors du traitement de votre demande. Veuillez réessayer.</strong>';
         }
     } catch (error) {
         console.error('Erreur lors de la requête:', error);

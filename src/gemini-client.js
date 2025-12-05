@@ -110,19 +110,24 @@ async function queryDocuments(question) {
 
   console.log(`Question: ${question}`);
 
-  const response = await ai.models.generateContent({
-    model: config.gemini.model,
-    contents: fullPrompt,
-    config: {
-      tools: [{
-        fileSearch: {
-          fileSearchStoreNames: [fileSearchStore.name]
-        }
-      }]
-    }
-  });
+  try {
+    const response = await ai.models.generateContent({
+      model: config.gemini.model,
+      contents: fullPrompt,
+      config: {
+        tools: [{
+          fileSearch: {
+            fileSearchStoreNames: [fileSearchStore.name]
+          }
+        }]
+      }
+    });
 
-  return response.text;
+    return response.text;
+  } catch (error) {
+    console.error('Erreur API Gemini:', error.message || error);
+    throw new Error('Service temporairement indisponible');
+  }
 }
 
 /**
