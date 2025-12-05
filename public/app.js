@@ -1,7 +1,171 @@
-// Charger la liste des documents au chargement de la page
+// État de l'utilisateur courant
+let currentUser = null;
+
+// ==================== INITIALISATION ====================
+
+// Vérifier l'authentification au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-    listDocuments();
+    checkAuth();
 });
+
+/**
+ * Vérifier si l'utilisateur est connecté
+ */
+async function checkAuth() {
+    try {
+        const response = await fetch('/api/me');
+        const result = await response.json();
+
+        if (result.success && result.authenticated) {
+            currentUser = result.user;
+            hideLoginModal();
+            updateUIForUser(result.user);
+            // Charger les documents uniquement pour admin
+            if (result.user.role === 'admin') {
+                listDocuments();
+            }
+        } else {
+            showLoginModal();
+        }
+    } catch (error) {
+        console.error('Erreur lors de la vérification auth:', error);
+        showLoginModal();
+    }
+}
+
+// ==================== LOGIN / LOGOUT ====================
+
+/**
+ * Afficher le modal de login
+ */
+function showLoginModal() {
+    document.getElementById('loginModal').classList.add('active');
+    document.getElementById('username').focus();
+}
+
+/**
+ * Cacher le modal de login
+ */
+function hideLoginModal() {
+    document.getElementById('loginModal').classList.remove('active');
+    document.getElementById('loginForm').reset();
+    document.getElementById('loginError').textContent = '';
+}
+
+/**
+ * Gérer la soumission du formulaire de login
+ */
+async function handleLogin(event) {
+    event.preventDefault();
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const errorElement = document.getElementById('loginError');
+
+    if (!username || !password) {
+        errorElement.textContent = 'Veuillez remplir tous les champs';
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            currentUser = result.user;
+            hideLoginModal();
+            updateUIForUser(result.user);
+            // Charger les documents uniquement pour admin
+            if (result.user.role === 'admin') {
+                listDocuments();
+            }
+        } else {
+            errorElement.textContent = result.error || 'Identifiants incorrects';
+        }
+    } catch (error) {
+        console.error('Erreur lors de la connexion:', error);
+        errorElement.textContent = 'Erreur de connexion au serveur';
+    }
+}
+
+/**
+ * Gérer la déconnexion
+ */
+async function handleLogout() {
+    try {
+        await fetch('/api/logout', {
+            method: 'POST'
+        });
+    } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+    }
+
+    currentUser = null;
+    closeUserDropdown();
+    showLoginModal();
+    document.getElementById('userMenu').style.display = 'none';
+    document.getElementById('uploadSection').style.display = 'none';
+    document.getElementById('documentsSection').style.display = 'none';
+}
+
+// ==================== USER MENU ====================
+
+/**
+ * Toggle le dropdown du menu utilisateur
+ */
+function toggleUserDropdown() {
+    const userMenu = document.getElementById('userMenu');
+    userMenu.classList.toggle('open');
+}
+
+/**
+ * Fermer le dropdown
+ */
+function closeUserDropdown() {
+    document.getElementById('userMenu').classList.remove('open');
+}
+
+// Fermer le dropdown en cliquant ailleurs
+document.addEventListener('click', (e) => {
+    const userMenu = document.getElementById('userMenu');
+    if (!userMenu.contains(e.target)) {
+        closeUserDropdown();
+    }
+});
+
+/**
+ * Mettre à jour l'interface selon l'utilisateur connecté
+ */
+function updateUIForUser(user) {
+    // Afficher le menu utilisateur
+    const userMenu = document.getElementById('userMenu');
+    userMenu.style.display = 'block';
+
+    // Mettre à jour le nom et le rôle
+    document.getElementById('userDisplayName').textContent = user.username;
+    document.getElementById('userRole').textContent = user.role;
+
+    // Afficher/cacher les sections selon le rôle
+    const uploadSection = document.getElementById('uploadSection');
+    const documentsSection = document.getElementById('documentsSection');
+
+    if (user.role === 'admin') {
+        uploadSection.style.display = 'block';
+        documentsSection.style.display = 'block';
+    } else {
+        uploadSection.style.display = 'none';
+        documentsSection.style.display = 'none';
+    }
+}
+
+// ==================== STATUS MESSAGES ====================
 
 /**
  * Afficher un message de statut
@@ -19,6 +183,8 @@ function showStatus(elementId, message, type = 'info') {
         }, 5000);
     }
 }
+
+// ==================== DOCUMENTS ====================
 
 /**
  * Uploader un document
@@ -57,7 +223,11 @@ async function uploadDocument() {
             fileInput.value = ''; // Réinitialiser l'input
             listDocuments(); // Rafraîchir la liste
         } else {
-            showStatus('uploadStatus', `Erreur: ${result.error}`, 'error');
+            if (response.status === 401 || response.status === 403) {
+                showStatus('uploadStatus', 'Accès non autorisé. Reconnectez-vous.', 'error');
+            } else {
+                showStatus('uploadStatus', `Erreur: ${result.error}`, 'error');
+            }
         }
     } catch (error) {
         console.error('Erreur lors de l\'upload:', error);
@@ -120,6 +290,8 @@ async function listDocuments() {
                 return;
             }
 
+            const isAdmin = currentUser && currentUser.role === 'admin';
+
             documentsList.innerHTML = result.documents.map(doc => `
                 <div class="document-item">
                     <div class="document-info">
@@ -128,12 +300,14 @@ async function listDocuments() {
                             ${doc.wordCount.toLocaleString()} mots • Status: ${doc.status}
                         </div>
                     </div>
-                    <button
-                        onclick="deleteDocument('${escapeHtml(doc.displayName)}')"
-                        class="btn btn-danger"
-                    >
-                        Supprimer
-                    </button>
+                    ${isAdmin ? `
+                        <button
+                            onclick="deleteDocument('${escapeHtml(doc.displayName)}')"
+                            class="btn btn-danger"
+                        >
+                            Supprimer
+                        </button>
+                    ` : ''}
                 </div>
             `).join('');
         } else {
@@ -170,6 +344,8 @@ async function deleteDocument(displayName) {
         alert('Erreur de connexion au serveur');
     }
 }
+
+// ==================== UTILITAIRES ====================
 
 /**
  * Échapper les caractères HTML pour éviter les injections XSS

@@ -5,8 +5,8 @@
 }
 
 :root {
-    --primary-color: #4285f4;
-    --primary-hover: #357ae8;
+    --primary-color: #195F3C;
+    --primary-hover: #124a2e;
     --secondary-color: #5f6368;
     --success-color: #34a853;
     --error-color: #ea4335;
@@ -36,15 +36,9 @@ header {
     padding: 30px 0;
 }
 
-header h1 {
-    font-size: 2.5rem;
-    color: var(--primary-color);
-    margin-bottom: 10px;
-}
-
-.subtitle {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
+.header-logo {
+    max-width: 350px;
+    height: auto;
 }
 
 /* Cards */
@@ -249,23 +243,168 @@ header h1 {
     100% { transform: rotate(360deg); }
 }
 
-/* Footer */
-footer {
+/* ==================== MODAL LOGIN ==================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--card-background);
+    padding: 32px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h2 {
+    margin-bottom: 24px;
     text-align: center;
-    padding: 40px 0 20px;
+    color: var(--text-primary);
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.btn-full {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.error-message {
+    color: var(--error-color);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.error-message:empty {
+    display: none;
+}
+
+/* ==================== USER MENU ==================== */
+
+header {
+    position: relative;
+}
+
+.user-menu {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.user-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.user-button:hover {
+    background: var(--background);
+    border-color: var(--primary-color);
+}
+
+.user-button .arrow {
+    font-size: 0.8rem;
+    transition: transform 0.2s ease;
+}
+
+.user-menu.open .user-button .arrow {
+    transform: rotate(180deg);
+}
+
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    z-index: 100;
+}
+
+.user-menu.open .user-dropdown {
+    display: block;
+}
+
+.user-info {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
     color: var(--text-secondary);
 }
 
-footer a {
+.user-info strong {
     color: var(--primary-color);
-    text-decoration: none;
 }
 
-footer a:hover {
-    text-decoration: underline;
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--error-color);
+    transition: background-color 0.2s ease;
 }
 
-/* Responsive */
+.dropdown-item:hover {
+    background-color: var(--background);
+}
+
+/* ==================== RESPONSIVE ==================== */
+
 @media (max-width: 768px) {
     .container {
         padding: 12px;
@@ -291,5 +430,16 @@ footer a:hover {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
+    }
+
+    .modal-content {
+        margin: 20px;
+        padding: 24px;
+    }
+
+    .user-menu {
+        position: static;
+        text-align: right;
+        margin-bottom: 16px;
     }
 }

@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
 const geminiClient = require('./gemini-client');
+const auth = require('./auth');
 
 const router = express.Router();
 
@@ -24,11 +25,101 @@ const upload = multer({
   }
 });
 
+// ==================== ROUTES AUTHENTIFICATION ====================
+
+/**
+ * POST /api/login
+ * Authentifier un utilisateur
+ */
+router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Nom d\'utilisateur et mot de passe requis'
+      });
+    }
+
+    const user = await auth.authenticate(username, password);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Identifiants incorrects'
+      });
+    }
+
+    // Générer le token et créer le cookie
+    const token = auth.generateToken(user.username, user.role);
+
+    res.cookie(auth.COOKIE_NAME, token, {
+      httpOnly: true,
+      maxAge: auth.COOKIE_MAX_AGE,
+      sameSite: 'strict'
+    });
+
+    res.json({
+      success: true,
+      user: {
+        username: user.username,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Erreur lors de la connexion:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur lors de la connexion'
+    });
+  }
+});
+
+/**
+ * POST /api/logout
+ * Déconnecter l'utilisateur
+ */
+router.post('/logout', (req, res) => {
+  res.clearCookie(auth.COOKIE_NAME);
+  res.json({
+    success: true,
+    message: 'Déconnexion réussie'
+  });
+});
+
+/**
+ * GET /api/me
+ * Récupérer l'utilisateur connecté
+ */
+router.get('/me', (req, res) => {
+  const user = auth.getUserFromCookie(req);
+
+  if (!user) {
+    return res.json({
+      success: true,
+      authenticated: false,
+      user: null
+    });
+  }
+
+  res.json({
+    success: true,
+    authenticated: true,
+    user: {
+      username: user.username,
+      role: user.role
+    }
+  });
+});
+
+// ==================== ROUTES DOCUMENTS ====================
+
 /**
  * POST /api/upload
- * Upload un fichier vers le File Search Store
+ * Upload un fichier vers le File Search Store (admin uniquement)
  */
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/upload', auth.requireAdmin, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({

@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const config = require('./src/config');
 const geminiClient = require('./src/gemini-client');
 const routes = require('./src/routes');
@@ -10,6 +11,7 @@ const PORT = config.server.port;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Servir les fichiers statiques du dossier public
 app.use(express.static('public'));

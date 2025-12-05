@@ -1,0 +1,10 @@
+{
+  "admin": {
+    "password": "$2b$10$tjh634KzquA5xYEXxNb/2.mTHiXkUy0g5NPEkTsxAUvyMUQgO3zIS",
+    "role": "admin"
+  },
+  "guest": {
+    "password": "$2b$10$u7WBo2dechBxadUAalUea.nNal2Na8RwZcL4nVgHgdcFHjss1kWRm",
+    "role": "guest"
+  }
+}

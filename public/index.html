@@ -7,15 +7,49 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Modal de Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2>Connexion</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">Nom d'utilisateur</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                <div id="loginError" class="error-message"></div>
+                <button type="submit" class="btn btn-primary btn-full">Se connecter</button>
+            </form>
+        </div>
+    </div>
+
     <div class="container">
         <header>
-            <h1>Gemini File Search</h1>
-            <p class="subtitle">Interrogez vos documents avec l'IA</p>
+            <!-- Bouton utilisateur en haut à droite -->
+            <div id="userMenu" class="user-menu" style="display: none;">
+                <button id="userButton" class="user-button" onclick="toggleUserDropdown()">
+                    <span id="userDisplayName">Utilisateur</span>
+                    <span class="arrow">&#9662;</span>
+                </button>
+                <div id="userDropdown" class="user-dropdown">
+                    <div class="user-info">
+                        Connecté en tant que <strong id="userRole">guest</strong>
+                    </div>
+                    <button onclick="handleLogout()" class="dropdown-item">
+                        Se déconnecter
+                    </button>
+                </div>
+            </div>
+
+            <img src="logo.png" alt="Logo" class="header-logo">
         </header>
 
         <main>
-            <!-- Section Upload -->
-            <section class="card">
+            <!-- Section Upload (visible uniquement pour admin) -->
+            <section id="uploadSection" class="card" style="display: none;">
                 <h2>Uploader un document</h2>
                 <div class="upload-area">
                     <input type="file" id="fileInput" accept=".pdf,.txt,.docx,.md,.json">
@@ -28,20 +62,20 @@
 
             <!-- Section Query -->
             <section class="card">
-                <h2>Poser une question</h2>
+                <h2>Comment puis-je vous aider aujourd'hui ?</h2>
                 <textarea
                     id="questionInput"
-                    placeholder="Posez une question sur vos documents..."
+                    placeholder="Ecrivez ici votre question..."
                     rows="3"
                 ></textarea>
                 <button onclick="queryDocuments()" class="btn btn-primary">
-                    Interroger
+                    Envoyer
                 </button>
                 <div id="answerArea" class="answer-area"></div>
             </section>
 
-            <!-- Section Documents -->
-            <section class="card">
+            <!-- Section Documents (visible uniquement pour admin) -->
+            <section id="documentsSection" class="card" style="display: none;">
                 <div class="card-header">
                     <h2>Documents uploadés</h2>
                     <button onclick="listDocuments()" class="btn btn-secondary">
@@ -53,10 +87,6 @@
                 </div>
             </section>
         </main>
-
-        <footer>
-            <p>Propulsé par <a href="https://ai.google.dev/gemini-api/docs/file-search" target="_blank">Gemini File Search API</a></p>
-        </footer>
     </div>
 
     <script src="app.js"></script>
