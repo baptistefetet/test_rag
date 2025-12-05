@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini File Search - Interrogez vos documents</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gemini File Search</h1>
+            <p class="subtitle">Interrogez vos documents avec l'IA</p>
+        </header>
+
+        <main>
+            <!-- Section Upload -->
+            <section class="card">
+                <h2>Uploader un document</h2>
+                <div class="upload-area">
+                    <input type="file" id="fileInput" accept=".pdf,.txt,.docx,.md,.json">
+                    <button onclick="uploadDocument()" class="btn btn-primary">
+                        Uploader
+                    </button>
+                </div>
+                <div id="uploadStatus" class="status-message"></div>
+            </section>
+
+            <!-- Section Query -->
+            <section class="card">
+                <h2>Poser une question</h2>
+                <textarea
+                    id="questionInput"
+                    placeholder="Posez une question sur vos documents..."
+                    rows="3"
+                ></textarea>
+                <button onclick="queryDocuments()" class="btn btn-primary">
+                    Interroger
+                </button>
+                <div id="answerArea" class="answer-area"></div>
+            </section>
+
+            <!-- Section Documents -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>Documents uploadés</h2>
+                    <button onclick="listDocuments()" class="btn btn-secondary">
+                        Rafraîchir
+                    </button>
+                </div>
+                <div id="documentsList" class="documents-list">
+                    <p class="loading">Chargement...</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Propulsé par <a href="https://ai.google.dev/gemini-api/docs/file-search" target="_blank">Gemini File Search API</a></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
